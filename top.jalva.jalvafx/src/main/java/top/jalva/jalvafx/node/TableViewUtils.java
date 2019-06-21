@@ -1074,17 +1074,4 @@ public class TableViewUtils {
 	public static <T> void setItemsWithAutoselect(TableView<T> table, List<T> items) {
 		setItems(table, items, null);
 	}
-
-	// public static <T extends Object, K extends BigDecimal> void
-	// setEditBigDecimalCellFactory(TableColumn<T, K> cell,
-	// final BiConsumer<T, Double> changeHandler, String editControlHeader,
-	// Double minAllowedValue,
-	// Double maxAllowedValue, Function<T, Boolean> ignoreEdit, boolean
-	// showZeroFraction) {
-	//
-	// setEditNumberCellFactory(cell, changeHandler, editControlHeader,
-	// minAllowedValue, maxAllowedValue, ignoreEdit,
-	// showZeroFraction);
-	//
-	// }
 }

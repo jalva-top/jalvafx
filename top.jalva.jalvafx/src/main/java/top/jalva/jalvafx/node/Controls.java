@@ -507,7 +507,7 @@ public class Controls {
 		if (items != null && !items.isEmpty()) {
 
 			if (menuHeader != null)
-				menuItems.add(createContextMenuHeader(menuHeader));
+				menuItems.add(createHeaderMenuItem(menuHeader));
 
 			items = items.stream().filter(o -> o != null).distinct()
 					.sorted((o1, o2) -> o1.toString().compareTo(o2.toString())).collect(Collectors.toList());
@@ -564,7 +564,7 @@ public class Controls {
 		}
 	}
 
-	private static MenuItem createContextMenuHeader(String text) {
+	public static MenuItem createHeaderMenuItem(String text) {
 		MenuItem packageHeader = new MenuItem(text);
 		packageHeader.setStyle(CssStyle.FONT_SIZE_OVER_NORMAL + CssStyle.BACKGROUND_COLOR_SHY_LIGHT);
 
@@ -572,7 +572,7 @@ public class Controls {
 	}
 
 	private static void addMenuHeader(ContextMenu menu, String text) {
-		MenuItem packageHeader = createContextMenuHeader(text);
+		MenuItem packageHeader = createHeaderMenuItem(text);
 		menu.getItems().add(packageHeader);
 	}
 
@@ -608,6 +608,24 @@ public class Controls {
 			vbox.getChildren().add(parent);
 			if (i == MAX_ROW_INDEX)
 				break;
+
+			ContextMenu menu = new ContextMenu();
+			menu.getItems().add(Controls.createHeaderMenuItem("Копировать в буфер:"));
+			for (String word : item.split(" ")) {
+				if (word.length() > 3 && word.matches("[a-zA-Z0-9а-яА-Яієё\'\"\\.\\,]*")) {
+					MenuItem menuItem = new MenuItem(word);
+
+					menuItem.setOnAction(e -> {
+						Clipboard.set(word);
+					});
+
+					menu.getItems().add(menuItem);
+				}
+			}
+
+			if (menu.getItems().size() > 1)
+				label.setContextMenu(menu);
+
 			i++;
 		}
 
@@ -885,7 +903,6 @@ public class Controls {
 		});
 	}
 
-	/** if maxLength == null -> any length is allowed */
 	public static <TF extends TextField> void setAsDigitTextField(TF tf, boolean allowNegative) {
 		setAsDigitTextField(tf, null, allowNegative);
 	}
