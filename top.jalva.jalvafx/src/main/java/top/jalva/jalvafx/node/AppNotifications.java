@@ -28,7 +28,7 @@ public class AppNotifications {
 
 	/**
 	 * @param owner
-	 *            can be Screen, Window or Node. If owner==null then
+	 *            can be Screen, Window or Node. If owner == null then
 	 *            defaultOwner will be set as owner
 	 */
 	public static Notifications create(Object owner) {

@@ -9,6 +9,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.TextArea;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Priority;
+import top.jalva.jalvafx.util.Constant;
 
 public class DialogWindow {
 
@@ -18,15 +19,15 @@ public class DialogWindow {
 
 		switch (type) {
 		case INFORMATION:
-			header = "Информация";
+			header = Constant.get(Constant.Key.INFORMATION);
 			break;
 
 		case WARNING:
-			header = "Внимание";
+			header = Constant.get(Constant.Key.WARNING);
 			break;
 
 		case ERROR:
-			header = "Ошибка";
+			header = Constant.get(Constant.Key.ERROR);
 			break;
 
 		default:
@@ -56,14 +57,14 @@ public class DialogWindow {
 	}
 
 	public static void showStackTrace(Exception e) {
-		showStackTrace(e, "При выполнении последней операции произошла ошибка");
+		showStackTrace(e, Constant.get(Constant.Key.AN_ERROR_OCCURED_DURING_THE_LAST_OPERATION));
 	}
 
 	public static void showStackTrace(Exception e, String headerText) {
 
 		Alert alert = new Alert(AlertType.ERROR);
 		alert.initOwner(null);
-		alert.setTitle("ОШИБКА");
+		alert.setTitle(Constant.getUpper(Constant.Key.ERROR));
 		alert.setHeaderText(headerText);
 
 		StringWriter sw = new StringWriter();
@@ -71,7 +72,7 @@ public class DialogWindow {
 		e.printStackTrace(pw);
 		String exceptionText = sw.toString();
 
-		Label label = new Label("Описание исключительной ситуации:");
+		Label label = new Label(Constant.getUpper(Constant.Key.EXCEPTION_DESCRIPTION));
 
 		TextArea textArea = new TextArea(exceptionText);
 		textArea.setEditable(false);

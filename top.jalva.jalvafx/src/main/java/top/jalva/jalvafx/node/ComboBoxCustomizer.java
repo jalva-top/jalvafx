@@ -27,6 +27,7 @@ import javafx.util.Callback;
 import javafx.util.Pair;
 import javafx.util.StringConverter;
 import top.jalva.jalvafx.style.CssStyle;
+import top.jalva.jalvafx.util.Constant;
 import top.jalva.jalvafx.util.StringUtils;
 import top.jalva.jalvafx.util.StringUtils.KeyboardLayoutConvertationType;
 
@@ -49,7 +50,6 @@ public class ComboBoxCustomizer<T> {
 
 	Predicate<T> deemphasizedPredicate = null;
 	Predicate<T> emphasizedPredicate = null;
-	// Predicate<T> itemWithGlyphFilter = null;
 
 	Function<T, Optional<Pair<FontAwesome.Glyph, String>>> glyphStyleFunction = null;
 
@@ -100,17 +100,6 @@ public class ComboBoxCustomizer<T> {
 		this.deemphasizedPredicate = filter;
 		return this;
 	}
-
-	// public ComboBoxCustomizer<T> glyph(FontAwesome.Glyph glyph, String
-	// cssStyle, Predicate<T> itemWithGlyphFilter) {
-	// if (glyph != null && itemWithGlyphFilter != null) {
-	// this.glyph = glyph;
-	// if (cssStyle != null)
-	// this.cssStyle = cssStyle;
-	// this.itemWithGlyphFilter = itemWithGlyphFilter;
-	// }
-	// return this;
-	// }
 
 	public ComboBoxCustomizer<T> glyph(FontAwesome.Glyph glyph, String cssStyle, Predicate<T> itemWithGlyphFilter) {
 		if (glyph != null && itemWithGlyphFilter != null) {
@@ -372,7 +361,7 @@ public class ComboBoxCustomizer<T> {
 
 	private void switchClearOnDoubleClick() {
 
-		String tooltipText = "Очистить - двойной клик";
+		String tooltipText = Constant.get(Constant.Key.DOUBLE_CLICK_TO_CLEAR);
 		Controls.addInfoRowTextToTooltip(comboBox, tooltipText);
 
 		if (comboBox.isEditable()) {

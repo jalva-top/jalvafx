@@ -46,6 +46,7 @@ import javafx.scene.layout.HBox;
 import top.jalva.jalvafx.style.CssStyle;
 import top.jalva.jalvafx.util.ApplicationFormatter;
 import top.jalva.jalvafx.util.Clipboard;
+import top.jalva.jalvafx.util.Constant;
 import top.jalva.jalvafx.util.DateUtils;
 import top.jalva.jalvafx.util.ListUtils;
 import top.jalva.jalvafx.util.NumberUtils;
@@ -714,7 +715,7 @@ public class TableViewUtils {
 						if (finalIgnoreEdit.apply(currentT))
 							addCopyToClipboardOnClick(label, item);
 						else
-							label.setTooltip(new Tooltip("Для редактирования ячейки кликните на ее значении"));
+							label.setTooltip(new Tooltip(Constant.get(Constant.Key.CLICK_ON_VALUE_TO_EDIT_CELL)));
 
 						hbox.getChildren().add(label);
 						setGraphic(hbox);
@@ -808,12 +809,12 @@ public class TableViewUtils {
 	/** One level of column nesting is supported */
 	public static <T> void addCopyToClipboardMenuItem(TableView<T> table) {
 
-		MenuItem copyTable = new MenuItem("Копировать таблицу".intern());
+		MenuItem copyTable = new MenuItem(Constant.get(Constant.Key.COPY_TABLE));
 		copyTable.setGraphic(Glyphs.createGlyph(FontAwesome.Glyph.COPY, CssStyle.TEXT_FILL_SUCCESS));
 
 		copyTable.setOnAction(e -> copyToClipboard(table, table.getItems()));
 
-		MenuItem copySelection = new MenuItem("Копировать строку".intern());
+		MenuItem copySelection = new MenuItem(Constant.get(Constant.Key.COPY_ROW));
 		copySelection.setGraphic(Glyphs.createGlyph(FontAwesome.Glyph.COPY, CssStyle.TEXT_FILL_SUCCESS));
 		copySelection.disableProperty().bind(table.getSelectionModel().selectedItemProperty().isNull());
 
@@ -969,7 +970,7 @@ public class TableViewUtils {
 
 				ComboBox<TableColumn<O, ?>> columnsComboBox = new ComboBox<>();
 				ComboBoxCustomizer.create(columnsComboBox).overrideToString(o -> o.getText()).customize();
-				columnsComboBox.setPromptText("Сумма значений для столбца");
+				columnsComboBox.setPromptText(Constant.get(Constant.Key.COLUMN_VALUE_SUM));
 
 				columnsComboBox.getItems().addAll(columnsToSum);
 
@@ -986,7 +987,7 @@ public class TableViewUtils {
 							}
 
 							HBox resultNode = Controls.createCaptionWithValueNode(
-									"Сумма всех ячеек [" + new_v.getText() + "]:",
+									Constant.get(Constant.Key.ALL_CELLS_SUM) + " [" + new_v.getText() + "]:",
 									ApplicationFormatter.format(NumberUtils.createBigDecimalPrice(sum)));
 
 							if (new_v.getGraphic() == null) {
@@ -997,7 +998,8 @@ public class TableViewUtils {
 
 							PopOvers.showPopOverWithContent(popOverOwner, resultNode, ArrowLocation.BOTTOM_LEFT);
 						} else
-							AppNotifications.create().text("Выбранный столбец не активен").showError();
+							AppNotifications.create().text(Constant.get(Constant.Key.CURRENT_COLUMN_IS_NOT_VISIBLE))
+									.showError();
 
 						columnsComboBox.setValue(null);
 					}

@@ -54,6 +54,7 @@ import top.jalva.jalvafx.style.CssStyle;
 import top.jalva.jalvafx.style.CssStyleClass;
 import top.jalva.jalvafx.util.ApplicationFormatter;
 import top.jalva.jalvafx.util.Clipboard;
+import top.jalva.jalvafx.util.Constant;
 import top.jalva.jalvafx.util.DateUtils;
 import top.jalva.jalvafx.util.StringUtils;
 
@@ -140,7 +141,7 @@ public class Controls {
 	}
 
 	public static String getDefaultPlaceholderText() {
-		return "Ничего не найдено".intern();
+		return Constant.get(Constant.Key.NOTHING_FOUND);
 	}
 
 	public static Node createDefaultPlaceholder() {
@@ -152,7 +153,7 @@ public class Controls {
 	}
 
 	public static String getPlaceholderWhenUpdateDataText() {
-		return "Получение данных...".intern();
+		return Constant.get(Constant.Key.DATA_LOAD);
 	}
 
 	public static Node createPlaceholderWhenUpdateData() {
@@ -164,7 +165,7 @@ public class Controls {
 	}
 
 	public static Node createPlaceholderWhenError(Exception e) {
-		Label label = new Label("ПРОИЗОШЛА ОШИБКА".intern());
+		Label label = new Label(Constant.get(Constant.Key.ERROR_HAPPENED));
 		if (e != null && e.getMessage() != null && !e.getMessage().isEmpty())
 			label.setTooltip(new Tooltip(e.getMessage()));
 		label.setGraphic(Glyphs.createGlyph(FontAwesome.Glyph.WARNING, CssStyle.TEXT_FILL_DANGER));
@@ -209,7 +210,7 @@ public class Controls {
 	}
 
 	private static MenuItem createCopyMenuItem(TextInputControl inputControl, String menuItemId) {
-		MenuItem copy = new MenuItem("Копировать".intern());
+		MenuItem copy = new MenuItem(Constant.get(Constant.Key.COPY));
 		copy.setGraphic(Glyphs.createGlyph(FontAwesome.Glyph.COPY, CssStyle.TEXT_FILL_SUCCESS));
 
 		copy.setOnAction(e -> copyTextToClipboard(inputControl, false));
@@ -226,7 +227,7 @@ public class Controls {
 	private static MenuItem createPasteMenuItem(TextInputControl inputControl, String menuItemId) {
 		HBox parent = createHBox(10.0, Pos.BASELINE_LEFT);
 
-		Label label = new Label("Вставить:");
+		Label label = new Label(Constant.get(Constant.Key.PASTE) + ":");
 		label.setStyle(CssStyle.TEXT_FILL_BLACK);
 		Glyph glyph = Glyphs.createPasteGlyph();
 		label.setGraphic(glyph);
@@ -284,7 +285,7 @@ public class Controls {
 		clearLabel = createLabelWithGlyphToUseAsButton(glyph, CssStyle.TEXT_FILL_DANGER, CssStyle.TEXT_FILL_SHY_LIGHT);
 		clearLabel.getGraphic().setVisible(false);
 
-		Tooltip tooltip = new Tooltip("Очистить".intern());
+		Tooltip tooltip = new Tooltip(Constant.get(Constant.Key.CLEAR));
 		clearLabel.setTooltip(tooltip);
 
 		if (textField.getPromptText() != null && !textField.getPromptText().trim().isEmpty()) {
@@ -379,7 +380,7 @@ public class Controls {
 			if (searchHistory != null && !searchHistory.isEmpty()) {
 
 				ObjectProperty<String> prop = PopOvers.showObjectChoosePopOver(historyLabel, searchHistory,
-						"История поиска", ArrowLocation.TOP_RIGHT);
+						Constant.get(Constant.Key.SEARCH_HISTORY), ArrowLocation.TOP_RIGHT);
 
 				prop.addListener((ov, old_v, new_v) -> {
 					customTextField.setText(new_v);
@@ -452,7 +453,7 @@ public class Controls {
 				packageList.addAll(Arrays.asList(1, 2, 3, 4, 5));
 			}
 
-			addMenuHeader(menu, "Штуки:");
+			addMenuHeader(menu, Constant.get(Constant.Key.ITEMS) + ":");
 			for (Integer item : quantityList) {
 
 				MenuItem menuItem;
@@ -471,7 +472,7 @@ public class Controls {
 			}
 
 			if (!packageList.isEmpty())
-				addMenuHeader(menu, "Упаковки:");
+				addMenuHeader(menu, Constant.get(Constant.Key.BOXES) + ":");
 
 			for (Integer item : packageList) {
 
@@ -547,7 +548,7 @@ public class Controls {
 
 	public static void setClearOnDoubleClick(ComboBox<?> comboBox) {
 
-		String tooltipText = "Очистить - двойной клик".intern();
+		String tooltipText = Constant.get(Constant.Key.DOUBLE_CLICK_TO_CLEAR);
 		addInfoRowTextToTooltip(comboBox, tooltipText);
 
 		if (comboBox.isEditable()) {
@@ -583,7 +584,7 @@ public class Controls {
 		VBox vbox = new VBox();
 		vbox.setPadding(new Insets(15.0));
 
-		Label title = new Label("ВНИМАНИЕ");
+		Label title = new Label(Constant.getUpper(Constant.Key.WARNING));
 		title.setStyle(CssStyle.TEXT_FILL_DANGER);
 		title.setGraphic(Glyphs.createGlyph(FontAwesome.Glyph.WARNING, CssStyle.TEXT_FILL_DANGER));
 
@@ -610,7 +611,9 @@ public class Controls {
 				break;
 
 			ContextMenu menu = new ContextMenu();
-			menu.getItems().add(Controls.createHeaderMenuItem("Копировать в буфер:"));
+
+			String menuHeader = Constant.get(Constant.Key.COPY_TO_CLIPBOARD) + ":";
+			menu.getItems().add(Controls.createHeaderMenuItem(menuHeader));
 			for (String word : item.split(" ")) {
 				if (word.length() > 3 && word.matches("[a-zA-Z0-9а-яА-Яієё\'\"\\.\\,]*")) {
 					MenuItem menuItem = new MenuItem(word);
@@ -661,12 +664,12 @@ public class Controls {
 
 	/** Use for PopOver */
 	public static HBox createSaveCancelButtonHBox(Button save, Button cancel) {
-		save.setText("Сохранить".intern());
+		save.setText(Constant.get(Constant.Key.SAVE));
 		save.getStyleClass().add(CssStyleClass.SUCCESS);
 		save.setStyle(CssStyle.BUTTON_HEIGHT_24 + CssStyle.TEXT_NOT_ITALIC + CssStyle.TEXT_NOT_BOLD);
 		save.setGraphic(Glyphs.createGlyph(FontAwesome.Glyph.SAVE));
 
-		cancel.setText("Отмена".intern());
+		cancel.setText(Constant.get(Constant.Key.CANCEL));
 		cancel.setStyle(CssStyle.BUTTON_HEIGHT_24 + CssStyle.TEXT_NOT_ITALIC + CssStyle.TEXT_NOT_BOLD);
 
 		HBox buttons = Controls.createHBox(10.0, Pos.CENTER_LEFT);
@@ -677,12 +680,12 @@ public class Controls {
 
 	/** Use for PopOver */
 	public static ButtonBar createYesNoButtonHBox(Button yes, Button no) {
-		yes.setText("Да".intern());
+		yes.setText(Constant.get(Constant.Key.YES));
 		yes.getStyleClass().add(CssStyleClass.SUCCESS);
 		yes.setStyle(CssStyle.BUTTON_HEIGHT_24 + CssStyle.TEXT_NOT_ITALIC + CssStyle.TEXT_NOT_BOLD);
 		yes.setGraphic(Glyphs.createGlyph(FontAwesome.Glyph.CHECK));
 
-		no.setText("Нет".intern());
+		no.setText(Constant.get(Constant.Key.NO));
 		no.setStyle(CssStyle.BUTTON_HEIGHT_24 + CssStyle.TEXT_NOT_ITALIC + CssStyle.TEXT_NOT_BOLD);
 
 		ButtonBar buttons = new ButtonBar();
@@ -740,7 +743,7 @@ public class Controls {
 		if (menu == null)
 			menu = new ContextMenu();
 
-		MenuItem menuItem = new MenuItem("Очистить".intern());
+		MenuItem menuItem = new MenuItem(Constant.get(Constant.Key.CLEAR));
 		Glyph glyph = Glyphs.createGlyph(FontAwesome.Glyph.CLOSE, CssStyle.TEXT_FILL_DANGER);
 		menuItem.setGraphic(glyph);
 
@@ -761,27 +764,27 @@ public class Controls {
 		if (menu == null)
 			menu = new ContextMenu();
 
-		addMenuHeader(menu, "Установить:");
+		addMenuHeader(menu, Constant.get(Constant.Key.SET) + ":");
 
-		MenuItem today = new MenuItem("Сегодня");
+		MenuItem today = new MenuItem(Constant.get(Constant.Key.TODAY));
 		today.setOnAction(e -> datePicker.setValue(LocalDate.now()));
 
-		MenuItem yesterday = new MenuItem("Вчера");
+		MenuItem yesterday = new MenuItem(Constant.get(Constant.Key.YESTERDAY));
 		yesterday.setOnAction(e -> datePicker.setValue(LocalDate.now().minusDays(1)));
 
-		MenuItem tomorrow = new MenuItem("Завтра");
+		MenuItem tomorrow = new MenuItem(Constant.get(Constant.Key.TOMORROW));
 		tomorrow.setOnAction(e -> datePicker.setValue(LocalDate.now().plusDays(1)));
 
-		MenuItem curMonthBegin = new MenuItem("Начало текущего месяца");
+		MenuItem curMonthBegin = new MenuItem(Constant.get(Constant.Key.CURRENT_MOTH_BEGIN));
 		curMonthBegin.setOnAction(e -> datePicker.setValue(DateUtils.getMonthBegin(LocalDate.now())));
 
-		MenuItem curMonthEnd = new MenuItem("Конец текущего месяца");
+		MenuItem curMonthEnd = new MenuItem(Constant.get(Constant.Key.CURRENT_MOTH_END));
 		curMonthEnd.setOnAction(e -> datePicker.setValue(DateUtils.getMonthEnd(LocalDate.now())));
 
-		MenuItem prevMonthBegin = new MenuItem("Начало предыдущего месяца");
+		MenuItem prevMonthBegin = new MenuItem(Constant.get(Constant.Key.PREVIOUS_MOTH_BEGIN));
 		prevMonthBegin.setOnAction(e -> datePicker.setValue(DateUtils.getMonthBegin(LocalDate.now().minusMonths(1))));
 
-		MenuItem prevMonthEnd = new MenuItem("Конец предыдущего месяца");
+		MenuItem prevMonthEnd = new MenuItem(Constant.get(Constant.Key.PREVIOUS_MOTH_END));
 		prevMonthEnd.setOnAction(e -> datePicker.setValue(DateUtils.getMonthEnd(LocalDate.now().minusMonths(1))));
 
 		menu.getItems().addAll(today, yesterday, tomorrow, new SeparatorMenuItem(), curMonthBegin, curMonthEnd,
@@ -793,7 +796,7 @@ public class Controls {
 	public static void addCopyToClipboardOnClick(Labeled label, boolean copyAsComaSeparatedDecimal) {
 		HBox hbox = createHBox(10.0, Pos.CENTER);
 		hbox.setPadding(new Insets(10.0));
-		Label successMessage = new Label("Скопировано в буфер обмена");
+		Label successMessage = new Label(Constant.get(Constant.Key.COPY_TO_CLIPBOARD));
 		successMessage.setStyle(
 				CssStyle.TEXT_FILL_BLACK + CssStyle.TEXT_NOT_BOLD + CssStyle.TEXT_NOT_ITALIC + CssStyle.FONT_SIZE_12px);
 		hbox.getChildren().addAll(Glyphs.createGlyph(FontAwesome.Glyph.COPY, CssStyle.TEXT_FILL_SUCCESS),
@@ -803,7 +806,7 @@ public class Controls {
 			PopOvers.copyToClipboardPopOver = PopOvers.createPopOver(false);
 		PopOvers.copyToClipboardPopOver.setContentNode(hbox);
 
-		String tooltipText = "Нажмите, чтобы скопировать в буфер обмена";
+		String tooltipText = Constant.get(Constant.Key.CLICK_TO_COPY_TO_CLIPBOARD);
 		addInfoRowTextToTooltip(label, tooltipText);
 
 		label.setOnMouseClicked(e -> {
@@ -1032,8 +1035,8 @@ public class Controls {
 	}
 
 	public static void customizeCheckComboBox(CheckComboBox<?> checkComboBox) {
-		MenuItem checkAll = new MenuItem("Выбрать все");
-		MenuItem uncheckAll = new MenuItem("Убрать все");
+		MenuItem checkAll = new MenuItem(Constant.get(Constant.Key.CHECK_ALL));
+		MenuItem uncheckAll = new MenuItem(Constant.get(Constant.Key.UNCHECK_ALL));
 
 		checkAll.setGraphic(Glyphs.createGlyph(FontAwesome.Glyph.CHECK, CssStyle.TEXT_FILL_SUCCESS));
 		uncheckAll.setGraphic(Glyphs.createGlyph(FontAwesome.Glyph.CLOSE, CssStyle.TEXT_FILL_DANGER));

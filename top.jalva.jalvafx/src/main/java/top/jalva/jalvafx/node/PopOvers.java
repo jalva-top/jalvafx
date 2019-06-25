@@ -38,6 +38,7 @@ import javafx.util.Duration;
 import top.jalva.jalvafx.style.CssStyle;
 import top.jalva.jalvafx.style.CssStyleClass;
 import top.jalva.jalvafx.util.ApplicationFormatter;
+import top.jalva.jalvafx.util.Constant;
 import top.jalva.jalvafx.util.DateUtils;
 import top.jalva.jalvafx.util.NumberUtils;
 import top.jalva.jalvafx.util.StringUtils;
@@ -148,12 +149,12 @@ public class PopOvers {
 		textToEditArea.setPrefHeight(prefWidth);
 		textToEditArea.setWrapText(true);
 
-		Button save = new Button("Сохранить");
+		Button save = new Button(Constant.get(Constant.Key.SAVE));
 		save.getStyleClass().add(CssStyleClass.SUCCESS);
 		save.setStyle(CssStyle.BUTTON_HEIGHT_24);
 		save.setGraphic(Glyphs.createGlyph(FontAwesome.Glyph.SAVE));
 
-		Button cancel = new Button("Отмена");
+		Button cancel = new Button(Constant.get(Constant.Key.CANCEL));
 		cancel.setStyle(CssStyle.BUTTON_HEIGHT_24);
 
 		HBox buttons = Controls.createHBox(10.0, Pos.CENTER_LEFT);
@@ -166,7 +167,7 @@ public class PopOvers {
 		count.setStyle(CssStyle.TEXT_FILL_SHY);
 		AnchorPane.setLeftAnchor(count, 0.0);
 
-		Label maxCount = new Label("Максимальная длина строки: " + maxLength);
+		Label maxCount = new Label(Constant.get(Constant.Key.MAX_ALLOWED_TEXT_LENGTH) + maxLength);
 		maxCount.setStyle(CssStyle.TEXT_FILL_DANGER);
 		AnchorPane.setRightAnchor(maxCount, 0.0);
 
@@ -187,10 +188,14 @@ public class PopOvers {
 			textEditPopOver.show(owner);
 
 		textToEditArea.textProperty().addListener((ov, old_v, new_v) -> {
+			String text = Constant.get(Constant.Key.CURRENT_TEXT_LENGTH);
+
 			if (new_v != null)
-				count.setText("Введено символов: " + new_v.length());
+				text += new_v.length();
 			else
-				count.setText("Введено символов: " + 0);
+				text += 0;
+
+			count.setText(text);
 		});
 		textToEditArea.setText(textToEdit);
 
@@ -204,8 +209,8 @@ public class PopOvers {
 				if (owner != null)
 					textEditPopOver.hide();
 			} else
-				AppNotifications.create(parent).title("Редактирование текста")
-						.text("Максимальная допустимая длина строки: " + maxLength).showWarning();
+				AppNotifications.create(parent).title(Constant.get(Constant.Key.TEXT_EDIT))
+						.text(Constant.get(Constant.Key.MAX_ALLOWED_TEXT_LENGTH) + maxLength).showWarning();
 		});
 
 		cancel.setOnAction(e -> {
@@ -311,17 +316,17 @@ public class PopOvers {
 		else
 			Controls.setAsDoubleTextField(numberToEditTF);
 
-		Button save = new Button("Сохранить");
-		Button cancel = new Button("Отмена");
+		Button save = new Button(Constant.get(Constant.Key.SAVE));
+		Button cancel = new Button(Constant.get(Constant.Key.CANCEL));
 		HBox buttons = Controls.createSaveCancelButtonHBox(save, cancel);
 
 		if (StringUtils.isBlank(warningMessage)) {
 			if (minAllowedValue != null && maxAllowedValue != null)
-				warningMessage = "Допускается значение"
-						+ (minAllowedValue != null ? " не менее " + ApplicationFormatter.formatPrice(minAllowedValue)
-								: "")
-						+ (maxAllowedValue != null ? " не более " + ApplicationFormatter.formatPrice(maxAllowedValue)
-								: "");
+				warningMessage = Constant.get(Constant.Key.VALUE_IS_ALLOWED_TO_BE)
+						+ (minAllowedValue != null ? Constant.get(Constant.Key.NO_LESS_THAN)
+								+ ApplicationFormatter.formatPrice(minAllowedValue) : "")
+						+ (maxAllowedValue != null ? Constant.get(Constant.Key.NO_GREATER_THAN)
+								+ ApplicationFormatter.formatPrice(maxAllowedValue) : "");
 		}
 
 		parent.getChildren().addAll(headerLabel, numberToEditTF);
@@ -354,8 +359,8 @@ public class PopOvers {
 			} catch (Exception e1) {
 			}
 
-			String title = "Редактирование числа".intern();
-			String incorrectValueMessage = "Введено некорректное значение".intern();
+			String title = Constant.get(Constant.Key.NUMBER_EDIT);
+			String incorrectValueMessage = Constant.get(Constant.Key.ENTERED_VALUE_IS_INVALID);
 
 			if (newDoubleValue != null && (minAllowedValue == null || newDoubleValue.compareTo(minAllowedValue) >= 0)
 					&& (maxAllowedValue == null || newDoubleValue.compareTo(maxAllowedValue) <= 0)) {
@@ -556,7 +561,7 @@ public class PopOvers {
 
 		ComboBox<Integer> hour = new ComboBox<>();
 		ComboBoxCustomizer.create(hour).overrideToString(o -> o.intValue() < 10 ? "0" + o : o.toString()).customize();
-		hour.setPromptText("Часы");
+		hour.setPromptText(Constant.get(Constant.Key.HOURS));
 		int minHour = minAllowedTime.getHour();
 		int maxHour = maxAllowedTime.getHour();
 		for (Integer hourValue = minHour; hourValue <= maxHour; hourValue++)
@@ -568,7 +573,7 @@ public class PopOvers {
 
 		ComboBox<Integer> minute = new ComboBox<>();
 		ComboBoxCustomizer.create(minute).overrideToString(o -> o.intValue() < 10 ? "0" + o : o.toString()).customize();
-		minute.setPromptText("Минуты");
+		minute.setPromptText(Constant.get(Constant.Key.MINUTES));
 		minute.getItems().addAll(0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55);
 		if (defaultValue != null)
 			minute.setValue(defaultValue.getMinute());
@@ -586,8 +591,9 @@ public class PopOvers {
 
 				if (newTime.isBefore(minTimeValue) || newTime.isAfter(maxTimeValue)) {
 					AppNotifications.create(popOver)
-							.text("Некорректно задано время. Значение может быть в диапазоне между "
-									+ ApplicationFormatter.formatTime(minAllowedTime) + " и "
+							.text(Constant.get(Constant.Key.INCORRECT_TIME_VALUE_VALUE_SHOULD_BE_BETWEEN)
+									+ ApplicationFormatter.formatTime(minAllowedTime) + " "
+									+ Constant.get(Constant.Key.AND) + " "
 									+ ApplicationFormatter.formatTime(maxAllowedTime))
 							.showWarning();
 					;
@@ -634,16 +640,16 @@ public class PopOvers {
 			if (minAllowedDate != null) {
 				if (value.isBefore(minAllowedDate)) {
 					error = true;
-					AppNotifications.create(popOver)
-							.text("Выберите дату не ранее " + DateUtils.asShortString(minAllowedDate)).showError();
+					AppNotifications.create(popOver).text(Constant.get(Constant.Key.OPT_FOR_A_DATE_NO_EARLIER_THAN)
+							+ DateUtils.asShortString(minAllowedDate)).showError();
 				}
 			}
 
 			if (maxAllowedDate != null) {
 				if (value.isBefore(maxAllowedDate)) {
 					error = true;
-					AppNotifications.create(popOver)
-							.text("Выберите дату не позднее " + DateUtils.asShortString(maxAllowedDate)).showError();
+					AppNotifications.create(popOver).text(Constant.get(Constant.Key.OPT_FOR_A_DATE_NO_LATER_THAN)
+							+ DateUtils.asShortString(maxAllowedDate)).showError();
 				}
 			}
 
