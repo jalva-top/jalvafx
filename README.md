@@ -14,9 +14,9 @@ comboBox.getItems().addAll(items);
 
 ComboBoxCustomizer.create(comboBox)
                   .emphasized(o -> o.startsWith("F"))
-				  .multyColumn(o -> Arrays.asList(
-								   "item index = " + items.indexOf(o), 
-								   o == null ? "" : "hashCode = " + o.hashCode()
-								   ))
-				  .customize();
+		  .multyColumn(o -> Arrays.asList(
+						   "item index = " + items.indexOf(o), 
+					           o == null ? "" : "hashCode = " + o.hashCode()
+				    ))
+		  .customize();
 ```
