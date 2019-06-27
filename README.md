@@ -2,8 +2,8 @@
 JavaFx library contains node utility classes and controller interfaces.
 Library support two languages (English and Russian). To add your locale support you should create file **resources/jalvafxConstants_[locale].properties** with dictionary. See examples in **resources/jalvafxConstants_en.properties** and  **resources/jalvafxConstants_ru.properties** .
 
-##Usage
-####ComboBoxCustomizer:
+## Usage
+#### ComboBoxCustomizer:
 
 ```
 List<String> items = Arrays.asList("One", "Two", "Three", "Four", "Five", "Six");
