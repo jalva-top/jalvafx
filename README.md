@@ -5,16 +5,18 @@ Library support two languages (English and Russian). To add your locale support 
 ## Usage
 #### ComboBoxCustomizer:
 
+![](https://github.com/jalva-top/jalvafx/blob/master/image/ComboBoxCustomizer.png)
+
 ```
 List<String> items = Arrays.asList("One", "Two", "Three", "Four", "Five", "Six");
 ComboBox<String> comboBox = new ComboBox<>();
 comboBox.getItems().addAll(items);
 
 ComboBoxCustomizer.create(comboBox)
-                                   .emphasized(o -> o.startsWith("F")).multyColumn(o -> Arrays.asList(
+                  .emphasized(o -> o.startsWith("F"))
+				  .multyColumn(o -> Arrays.asList(
 								   "item index = " + items.indexOf(o), 
 								   o == null ? "" : "hashCode = " + o.hashCode()
 								   ))
-								   .customize();
+				  .customize();
 ```
-![](https://github.com/jalva-top/jalvafx/blob/master/image/ComboBoxCustomizer.png)
