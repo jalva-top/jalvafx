@@ -20,3 +20,4 @@ ComboBoxCustomizer.create(comboBox)
 				    ))
 		  .customize();
 ```
+**By default, Double click to clear ComboBox value**
