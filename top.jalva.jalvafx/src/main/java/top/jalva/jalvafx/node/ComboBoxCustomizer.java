@@ -1,9 +1,11 @@
 package top.jalva.jalvafx.node;
 
+import java.time.LocalTime;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -12,6 +14,8 @@ import java.util.stream.Stream;
 
 import org.controlsfx.glyphfont.FontAwesome;
 import org.controlsfx.glyphfont.FontAwesome.Glyph;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -32,6 +36,9 @@ import top.jalva.jalvafx.util.StringUtils;
 import top.jalva.jalvafx.util.StringUtils.KeyboardLayoutConvertationType;
 
 public class ComboBoxCustomizer<T> {
+
+	private final Logger log = LoggerFactory.getLogger(ComboBoxCustomizer.class.getName());
+
 	final static int ITEMS_SIZE_TO_CUT = 100;
 	final static String EMPHASIZED_CSS_STYLE = top.jalva.jalvafx.style.CssStyle.TEXT_BOLD;
 	final static String DE_EMPHASIZED_CSS_STYLE = CssStyle.TEXT_FILL_SHY_LIGHT;
@@ -54,6 +61,8 @@ public class ComboBoxCustomizer<T> {
 	Function<T, Optional<Pair<FontAwesome.Glyph, String>>> glyphStyleFunction = null;
 
 	boolean hideClearButton = false;
+	int delayBeforeSearch_millis = 0;
+	LocalTime lastSearch = LocalTime.now();
 
 	// ************** PUBLIC
 
@@ -123,6 +132,11 @@ public class ComboBoxCustomizer<T> {
 		return this;
 	}
 
+	public ComboBoxCustomizer<T> delayBeforeSearch(int milliseconds){
+		this.delayBeforeSearch_millis = milliseconds;
+		return this;	
+	}
+
 	public void customize() {
 		initCellFactory();
 		fillComboBoxAsAutocompleted();
@@ -189,7 +203,7 @@ public class ComboBoxCustomizer<T> {
 								if (emphasizedPredicate != null && emphasizedPredicate.test(item)) {
 									toStringLabel.setStyle(EMPHASIZED_CSS_STYLE);
 									toStringLabel
-											.setGraphic(Glyphs.createGlyph(emphasizedGlyph, emphasizedGlyphCssStyle));
+									.setGraphic(Glyphs.createGlyph(emphasizedGlyph, emphasizedGlyphCssStyle));
 								} else if (deemphasizedPredicate != null && deemphasizedPredicate.test(item))
 									toStringLabel.setStyle(DE_EMPHASIZED_CSS_STYLE);
 
@@ -265,49 +279,76 @@ public class ComboBoxCustomizer<T> {
 			final Predicate<T> emptyTextPredicate;
 			if (items.size() > ITEMS_SIZE_TO_CUT)
 				emptyTextPredicate = o -> false;
-			else
-				emptyTextPredicate = o -> false; // o -> true;
+				else
+					emptyTextPredicate = o -> false; // o -> true;
 
-			comboBox.setEditable(true);
+					comboBox.setEditable(true);
 
-			ObservableList<T> initialItems = null;
-			Stream<T> initialItemsStream = items.parallelStream();
-			if (emptyTextPredicate != null)
-				initialItemsStream = initialItemsStream.filter(emptyTextPredicate);
-			initialItems = FXCollections.observableArrayList(initialItemsStream.collect(Collectors.toList()));
-			comboBox.setItems(initialItems);
+					ObservableList<T> initialItems = null;
+					Stream<T> initialItemsStream = items.parallelStream();
+					if (emptyTextPredicate != null)
+						initialItemsStream = initialItemsStream.filter(emptyTextPredicate);
+					initialItems = FXCollections.observableArrayList(initialItemsStream.collect(Collectors.toList()));
+					comboBox.setItems(initialItems);
 
-			if (comboBox.getPromptText() != null && !comboBox.getPromptText().isEmpty()
-					&& comboBox.getTooltip() == null) {
-				comboBox.setTooltip(new Tooltip(comboBox.getPromptText()));
+					if (comboBox.getPromptText() != null && !comboBox.getPromptText().isEmpty()
+							&& comboBox.getTooltip() == null) {
+						comboBox.setTooltip(new Tooltip(comboBox.getPromptText()));
+					}
+
+					comboBox.getEditor().textProperty().addListener((ov, old_v, new_v) -> {
+						if(timeToSearch()) search(emptyTextPredicate, new_v);
+					});
+		}
+	}
+
+	private boolean timeToSearch(){	
+		boolean result = false;
+
+		if(delayBeforeSearch_millis == 0) result = true;
+		else{
+			LocalTime currenSearch = LocalTime.now();
+			lastSearch = currenSearch;
+			try {
+				TimeUnit.MILLISECONDS.sleep(delayBeforeSearch_millis);
+			} catch (InterruptedException e) {
+				log.error("Error occured during delay before search", e);
 			}
 
-			comboBox.getEditor().textProperty().addListener((ov, old_v, new_v) -> {
-				comboBox.hide();
+			if(lastSearch == currenSearch){
+				result = true;
+			}		
+		}
 
-				Predicate<T> predicate = null;
-				Comparator<? super T> comparator = null;
+		return result;
+	}
 
-				if (StringUtils.isBlank(new_v)) {
-					comboBox.setValue(null);
-					predicate = emptyTextPredicate;
-				} else {
+	private void search(final Predicate<T> emptyTextPredicate, String newText) {
+		comboBox.hide();
 
-					final String newValueLowerCase = new_v.toLowerCase();
-					final String newValueCyrrilicLowerCase;
+		Predicate<T> predicate = null;
+		Comparator<? super T> comparator = null;
 
-					final String firstLetter = newValueLowerCase.trim().substring(0, 1);
-					if (!StringUtils.isCyryllicLetter(firstLetter)) {
-						newValueCyrrilicLowerCase = StringUtils.convertKeyboardLayout(newValueLowerCase,
-								KeyboardLayoutConvertationType.FROM_LATIN_TO_RU).toLowerCase();
-					} else
-						newValueCyrrilicLowerCase = null;
+		if (StringUtils.isBlank(newText)) {
+			comboBox.setValue(null);
+			predicate = emptyTextPredicate;
+		} else {
 
-					if (StringUtils.isNotBlank(newValueCyrrilicLowerCase))
-						predicate = o -> toString.apply(o).toLowerCase().contains(newValueLowerCase)
-								|| toString.apply(o).toLowerCase().contains(newValueCyrrilicLowerCase);
-					else
-						predicate = o -> toString.apply(o).toLowerCase().contains(new_v.toLowerCase());
+			final String newValueLowerCase = newText.toLowerCase();
+			final String newValueCyrrilicLowerCase;
+
+			final String firstLetter = newValueLowerCase.trim().substring(0, 1);
+			if (!StringUtils.isCyryllicLetter(firstLetter)) {
+				newValueCyrrilicLowerCase = StringUtils.convertKeyboardLayout(newValueLowerCase,
+						KeyboardLayoutConvertationType.FROM_LATIN_TO_RU).toLowerCase();
+			} else
+				newValueCyrrilicLowerCase = null;
+
+			if (StringUtils.isNotBlank(newValueCyrrilicLowerCase))
+				predicate = o -> toString.apply(o).toLowerCase().contains(newValueLowerCase)
+				|| toString.apply(o).toLowerCase().contains(newValueCyrrilicLowerCase);
+				else
+					predicate = o -> toString.apply(o).toLowerCase().contains(newText.toLowerCase());
 
 					comparator = (o1, o2) -> {
 						int index_1 = toString.apply(o1).toLowerCase().indexOf(newValueLowerCase);
@@ -329,34 +370,29 @@ public class ComboBoxCustomizer<T> {
 					if (extraOrFilterFunction != null)
 						predicate = predicate.or(o -> extraOrFilterFunction.apply(o, newValueLowerCase));
 
-				}
-
-				List<T> filteredItems;
-
-				Stream<T> stream = items.parallelStream();
-				if (predicate != null)
-					stream = stream.filter(predicate);
-				if (comparator != null)
-					stream = stream.sorted(comparator);
-				filteredItems = stream.collect(Collectors.toList());
-
-				if (filteredItems.size() > ITEMS_SIZE_TO_CUT)
-					filteredItems.subList(ITEMS_SIZE_TO_CUT, filteredItems.size()).clear();
-
-				try {
-					comboBox.getItems().clear();
-					comboBox.getItems().addAll(filteredItems);
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-
-				if (comboBox.getValue() == null) {
-					comboBox.show();
-					comboBox.autosize();
-				}
-
-			});
 		}
+
+		List<T> filteredItems;
+
+		Stream<T> stream = items.parallelStream();
+		if (predicate != null)
+			stream = stream.filter(predicate);
+		if (comparator != null)
+			stream = stream.sorted(comparator);
+		filteredItems = stream.collect(Collectors.toList());
+
+		if (filteredItems.size() > ITEMS_SIZE_TO_CUT)
+			filteredItems.subList(ITEMS_SIZE_TO_CUT, filteredItems.size()).clear();
+
+		comboBox.getItems().clear();
+		comboBox.getItems().addAll(filteredItems);
+
+		if (comboBox.getValue() == null) {
+			comboBox.show();
+			comboBox.autosize();
+		}
+
+		log.trace("ComboBoxCustomizer items filtered by entered text '{}' ", newText);
 	}
 
 	private void switchClearOnDoubleClick() {

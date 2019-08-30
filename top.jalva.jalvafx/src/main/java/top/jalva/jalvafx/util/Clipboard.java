@@ -8,7 +8,12 @@ import java.awt.datatransfer.UnsupportedFlavorException;
 import java.io.IOException;
 import java.util.Optional;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public class Clipboard {
+	
+	private static final Logger log = LoggerFactory.getLogger(Clipboard.class.getName());
 
 	public static void set(String str) {
 		StringSelection ss = new StringSelection(str);
@@ -29,7 +34,7 @@ public class Clipboard {
 			if (StringUtils.isBlank(data))
 				data = null;
 		} catch (UnsupportedFlavorException | IOException e1) {
-			e1.printStackTrace();
+			log.error("Error happenned during clipboard content receiving ", e1);
 		}
 		return Optional.ofNullable(data);
 	}

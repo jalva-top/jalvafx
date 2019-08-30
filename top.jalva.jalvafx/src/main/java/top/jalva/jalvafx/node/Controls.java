@@ -21,6 +21,8 @@ import org.controlsfx.control.PopOver.ArrowLocation;
 import org.controlsfx.control.textfield.CustomTextField;
 import org.controlsfx.glyphfont.FontAwesome;
 import org.controlsfx.glyphfont.Glyph;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javafx.application.Platform;
 import javafx.beans.property.ObjectProperty;
@@ -59,6 +61,8 @@ import top.jalva.jalvafx.util.DateUtils;
 import top.jalva.jalvafx.util.StringUtils;
 
 public class Controls {
+	
+	private static final Logger log = LoggerFactory.getLogger(Controls.class.getName());
 
 	final static int SYMBOL_WIDTH = 12;
 	final static int ROW_HEIGHT = 30;
@@ -810,7 +814,7 @@ public class Controls {
 		addInfoRowTextToTooltip(label, tooltipText);
 
 		label.setOnMouseClicked(e -> {
-			if (e.getButton() == MouseButton.PRIMARY)
+			if (e.getButton() == MouseButton.PRIMARY && e.getClickCount() == 1)
 				copyTextToClipboard(label, copyAsComaSeparatedDecimal);
 		});
 	}
@@ -830,7 +834,8 @@ public class Controls {
 			valueToCopy = "";
 
 		if (copyAsComaSeparatedDecimal)
-			valueToCopy = valueToCopy.replace(".", ",").replace(" ", "").replace("\u00A0", ""); // &#160
+			valueToCopy = valueToCopy.replace(".", ",").replace(" ", "").replace("\u00A0", ""); 
+		// &#160
 		// symbol
 		// -
 		// delimeter
@@ -846,11 +851,11 @@ public class Controls {
 					try {
 						PopOvers.copyToClipboardPopOver.hide();
 					} catch (Exception e1) {
-						e1.printStackTrace();
+						log.error("Error occured during PopOvers.copyToClipboardPopOver.hide()", e1);
 					}
 				});
 			} catch (InterruptedException e1) {
-				e1.printStackTrace();
+				log.error("", e1);
 			}
 		});
 
@@ -858,7 +863,7 @@ public class Controls {
 			thread.join();
 			thread.start();
 		} catch (InterruptedException e1) {
-			e1.printStackTrace();
+			log.error("", e1);
 		}
 	}
 
@@ -932,6 +937,7 @@ public class Controls {
 		});
 	}
 
+	/*Need css styles file with style 'error' added to project*/
 	public static <TF extends TextField> void setTextFieldValueValidator(TF tf,
 			Function<String, Boolean> isValidValue) {
 
@@ -950,6 +956,7 @@ public class Controls {
 		});
 	}
 
+	/*Need css styles file with style 'error' added to project*/
 	public static <T, CB extends ComboBoxBase<T>> void setTextFieldValueValidator(CB cb,
 			Function<T, Boolean> isValidValue) {
 

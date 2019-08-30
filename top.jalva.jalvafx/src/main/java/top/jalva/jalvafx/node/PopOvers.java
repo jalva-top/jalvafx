@@ -11,6 +11,8 @@ import java.util.stream.Stream;
 import org.controlsfx.control.PopOver;
 import org.controlsfx.control.PopOver.ArrowLocation;
 import org.controlsfx.glyphfont.FontAwesome;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.panemu.tiwulfx.form.TypeAheadControl;
 
@@ -44,6 +46,8 @@ import top.jalva.jalvafx.util.NumberUtils;
 import top.jalva.jalvafx.util.StringUtils;
 
 public class PopOvers {
+
+	private static final Logger log = LoggerFactory.getLogger(PopOvers.class.getName());
 
 	static List<PopOver> popOvers = new ArrayList<>();
 
@@ -99,7 +103,7 @@ public class PopOvers {
 						if (popOver.getOwnerNode() != null)
 							popOver.hide(Duration.millis(0));
 					} catch (Exception e) {
-						e.printStackTrace();
+						log.error("Error happenned during popOver.hide(Duration.millis(0))", e);
 					}
 				}
 			}
@@ -210,7 +214,7 @@ public class PopOvers {
 					textEditPopOver.hide();
 			} else
 				AppNotifications.create(parent).title(Constant.get(Constant.Key.TEXT_EDIT))
-						.text(Constant.get(Constant.Key.MAX_ALLOWED_TEXT_LENGTH) + maxLength).showWarning();
+				.text(Constant.get(Constant.Key.MAX_ALLOWED_TEXT_LENGTH) + maxLength).showWarning();
 		});
 
 		cancel.setOnAction(e -> {
@@ -323,10 +327,10 @@ public class PopOvers {
 		if (StringUtils.isBlank(warningMessage)) {
 			if (minAllowedValue != null && maxAllowedValue != null)
 				warningMessage = Constant.get(Constant.Key.VALUE_IS_ALLOWED_TO_BE)
-						+ (minAllowedValue != null ? Constant.get(Constant.Key.NO_LESS_THAN)
-								+ ApplicationFormatter.formatPrice(minAllowedValue) : "")
-						+ (maxAllowedValue != null ? Constant.get(Constant.Key.NO_GREATER_THAN)
-								+ ApplicationFormatter.formatPrice(maxAllowedValue) : "");
+				+ (minAllowedValue != null ? Constant.get(Constant.Key.NO_LESS_THAN)
+						+ ApplicationFormatter.formatPrice(minAllowedValue) : "")
+				+ (maxAllowedValue != null ? Constant.get(Constant.Key.NO_GREATER_THAN)
+						+ ApplicationFormatter.formatPrice(maxAllowedValue) : "");
 		}
 
 		parent.getChildren().addAll(headerLabel, numberToEditTF);
@@ -439,7 +443,7 @@ public class PopOvers {
 			int maxStringLength = items.stream().filter(o -> o.toString() != null)
 					.mapToInt(o -> o.toString().contains(new_line_symbol)
 							? Stream.of(o.toString().split(new_line_symbol)).mapToInt(s -> s.length()).max().orElse(0)
-							: o.toString().length())
+									: o.toString().length())
 					.max().orElse(0);
 
 			int nRows = items.stream().mapToInt(o -> o.toString().contains(new_line_symbol)
@@ -586,25 +590,20 @@ public class PopOvers {
 
 		cancel.setOnAction(e -> popOver.hide());
 		save.setOnAction(e -> {
-			try {
-				LocalTime newTime = LocalTime.of(hour.getValue(), minute.getValue());
+			LocalTime newTime = LocalTime.of(hour.getValue(), minute.getValue());
 
-				if (newTime.isBefore(minTimeValue) || newTime.isAfter(maxTimeValue)) {
-					AppNotifications.create(popOver)
-							.text(Constant.get(Constant.Key.INCORRECT_TIME_VALUE_VALUE_SHOULD_BE_BETWEEN)
-									+ ApplicationFormatter.formatTime(minAllowedTime) + " "
-									+ Constant.get(Constant.Key.AND) + " "
-									+ ApplicationFormatter.formatTime(maxAllowedTime))
-							.showWarning();
-					;
-				} else {
-					result.setValue(newTime);
-					popOver.hide();
-				}
-			} catch (Exception ex) {
-				ex.printStackTrace();
+			if (newTime.isBefore(minTimeValue) || newTime.isAfter(maxTimeValue)) {
+				AppNotifications.create(popOver)
+				.text(Constant.get(Constant.Key.INCORRECT_TIME_VALUE_VALUE_SHOULD_BE_BETWEEN)
+						+ ApplicationFormatter.formatTime(minAllowedTime) + " "
+						+ Constant.get(Constant.Key.AND) + " "
+						+ ApplicationFormatter.formatTime(maxAllowedTime))
+				.showWarning();
+				;
+			} else {
+				result.setValue(newTime);
+				popOver.hide();
 			}
-
 		});
 		save.disableProperty().bind(hour.valueProperty().isNull().or(minute.valueProperty().isNull()));
 

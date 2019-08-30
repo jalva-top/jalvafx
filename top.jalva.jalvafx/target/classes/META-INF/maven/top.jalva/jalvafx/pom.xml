@@ -2,7 +2,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>top.jalva</groupId>
   <artifactId>jalvafx</artifactId>
-  <version>1.0.40</version>
+  <version>1.0.45</version>
   <name>top.jalva.jalvafx</name>
   
   <dependencies>
@@ -18,8 +18,13 @@
 			<artifactId>tiwulfx</artifactId>
 			<version>1.9.1</version>
 		</dependency>
-				
-	</dependencies>
+
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-api</artifactId>
+			<version>1.7.26</version>
+		</dependency>
+  </dependencies>
 	
 	<build>
 		<plugins>
