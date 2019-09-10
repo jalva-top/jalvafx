@@ -721,6 +721,7 @@ public class TableViewUtils {
 						setGraphic(hbox);
 
 						hbox.setOnMouseClicked(e -> {
+							PopOvers.hidePopOvers();
 							boolean notIgnored = !finalIgnoreEdit.apply(currentT);
 
 							if (notIgnored) {

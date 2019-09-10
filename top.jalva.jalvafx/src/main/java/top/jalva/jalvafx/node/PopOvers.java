@@ -566,8 +566,13 @@ public class PopOvers {
 		ComboBox<Integer> hour = new ComboBox<>();
 		ComboBoxCustomizer.create(hour).overrideToString(o -> o.intValue() < 10 ? "0" + o : o.toString()).customize();
 		hour.setPromptText(Constant.get(Constant.Key.HOURS));
-		int minHour = minAllowedTime.getHour();
-		int maxHour = maxAllowedTime.getHour();
+		
+		int minHour = 0;
+		if(minAllowedTime != null) minAllowedTime.getHour();
+		
+		int maxHour = 23;
+		if(maxAllowedTime != null) maxAllowedTime.getHour();
+		
 		for (Integer hourValue = minHour; hourValue <= maxHour; hourValue++)
 			hour.getItems().add(hourValue);
 		if (defaultValue != null)

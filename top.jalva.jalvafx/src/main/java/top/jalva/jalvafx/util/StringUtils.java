@@ -59,7 +59,7 @@ public class StringUtils {
 		char lastChar = string.charAt(string.length() - 1);
 
 		if ((firstChar == '\"' && lastChar == '\"') || (firstChar == '«' && lastChar == '»')) {
-			string.substring(1, string.length() - 1);
+			string = string.substring(1, string.length() - 1);
 		}
 
 		return string;
