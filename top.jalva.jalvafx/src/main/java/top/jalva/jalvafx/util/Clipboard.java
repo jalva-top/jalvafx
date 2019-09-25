@@ -34,7 +34,7 @@ public class Clipboard {
 			if (StringUtils.isBlank(data))
 				data = null;
 		} catch (UnsupportedFlavorException | IOException e1) {
-			log.error("Error happenned during clipboard content receiving ", e1);
+			log.error("Error happenned during clipboard content receiving", e1);
 		}
 		return Optional.ofNullable(data);
 	}
