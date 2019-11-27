@@ -39,9 +39,9 @@ public class ComboBoxCustomizer<T> {
 
 	private final Logger log = LoggerFactory.getLogger(ComboBoxCustomizer.class.getName());
 
-	final static int ITEMS_SIZE_TO_CUT = 100;
-	final static String EMPHASIZED_CSS_STYLE = top.jalva.jalvafx.style.CssStyle.TEXT_BOLD;
-	final static String DE_EMPHASIZED_CSS_STYLE = CssStyle.TEXT_FILL_SHY_LIGHT;
+	static final int ITEMS_SIZE_TO_CUT = 100;
+	static final String EMPHASIZED_CSS_STYLE = top.jalva.jalvafx.style.CssStyle.TEXT_BOLD;
+	static final String DE_EMPHASIZED_CSS_STYLE = CssStyle.TEXT_FILL_SHY_LIGHT;
 
 	Glyph emphasizedGlyph = FontAwesome.Glyph.CARET_RIGHT;
 	String emphasizedGlyphCssStyle = CssStyle.TEXT_FILL_SHY_LIGHT;
@@ -181,89 +181,94 @@ public class ComboBoxCustomizer<T> {
 
 	private void initCellFactory() {
 		if (extraColumnsFunction != null) {
-			comboBox.setCellFactory(new Callback<ListView<T>, ListCell<T>>() {
-
-				@Override
-				public ListCell<T> call(ListView<T> arg0) {
-					return new ListCell<T>() {
-
-						@Override
-						protected void updateItem(T item, boolean empty) {
-							super.updateItem(item, empty);
-
-							setText("");
-							setGraphic(null);
-							setStyle(null);
-
-							if (!empty) {
-								HBox parent = Controls.createHBox(10.0, Pos.CENTER_LEFT);
-
-								Label toStringLabel = new Label(toString.apply(item));
-
-								if (emphasizedPredicate != null && emphasizedPredicate.test(item)) {
-									toStringLabel.setStyle(EMPHASIZED_CSS_STYLE);
-									toStringLabel
-									.setGraphic(Glyphs.createGlyph(emphasizedGlyph, emphasizedGlyphCssStyle));
-								} else if (deemphasizedPredicate != null && deemphasizedPredicate.test(item))
-									toStringLabel.setStyle(DE_EMPHASIZED_CSS_STYLE);
-
-								setGlyphIfNecessary(item, toStringLabel);
-
-								parent.getChildren().add(toStringLabel);
-
-								List<Object> columnValues = extraColumnsFunction.apply(item);
-
-								for (Object columnValue : columnValues) {
-									Label columnLabel = new Label();
-
-									if (columnValue != null) {
-										columnLabel.setText(columnValue.toString());
-										columnLabel.setStyle(CssStyle.TEXT_FILL_SHY + CssStyle.BACKGROUND_COLOR_WHITE);
-									}
-
-									parent.getChildren().add(columnLabel);
-								}
-
-								setGraphic(parent);
-							}
-
-						}
-					};
-				}
-			});
+			setExtraColumnsCellFactory();
 		} else if (toString != defaultToString || glyphStyleFunction != null || emphasizedPredicate != null
 				|| deemphasizedPredicate != null) {
-			comboBox.setCellFactory(new Callback<ListView<T>, ListCell<T>>() {
-
-				@Override
-				public ListCell<T> call(ListView<T> arg0) {
-					return new ListCell<T>() {
-
-						@Override
-						protected void updateItem(T item, boolean empty) {
-							super.updateItem(item, empty);
-
-							setText(empty || item == null ? "" : toString.apply(item));
-							setGraphic(null);
-							setStyle(null);
-
-							if (!empty && item != null) {
-								if (emphasizedPredicate != null && emphasizedPredicate.test(item)) {
-									setStyle(EMPHASIZED_CSS_STYLE);
-									setGraphic(Glyphs.createGlyph(emphasizedGlyph, emphasizedGlyphCssStyle));
-								} else if (deemphasizedPredicate != null && deemphasizedPredicate.test(item))
-									setStyle(DE_EMPHASIZED_CSS_STYLE);
-
-								setGlyphIfNecessary(item, this);
-							}
-						}
-					};
-				}
-			});
+			setCellFactory();
 		}
 	}
 
-	private void setGlyphIfNecessary(T item, Labeled labeled) {
+	private void setCellFactory() {
+		comboBox.setCellFactory(new Callback<ListView<T>, ListCell<T>>() {
+
+			@Override
+			public ListCell<T> call(ListView<T> arg0) {
+				return new ListCell<T>() {
+
+					@Override
+					protected void updateItem(T item, boolean empty) {
+						super.updateItem(item, empty);
+
+						setText(empty || item == null ? "" : toString.apply(item));
+						setGraphic(null);
+						setStyle(null);
+
+						if (!empty && item != null) {
+							setEmphasizedDeemphasizedStyleIfNecessary(this, item);
+							setGlyphIfNecessary(this, item);
+						}
+					}
+				};
+			}
+		});
+	}
+
+	private void setEmphasizedDeemphasizedStyleIfNecessary(Labeled labeled, T item) {
+		if (emphasizedPredicate != null && emphasizedPredicate.test(item)) {
+			labeled.setStyle(EMPHASIZED_CSS_STYLE);
+			labeled.setGraphic(Glyphs.createGlyph(emphasizedGlyph, emphasizedGlyphCssStyle));
+		} else if (deemphasizedPredicate != null && deemphasizedPredicate.test(item))
+			labeled.setStyle(DE_EMPHASIZED_CSS_STYLE);
+	}
+
+	private void setExtraColumnsCellFactory() {
+		comboBox.setCellFactory(new Callback<ListView<T>, ListCell<T>>() {
+
+			@Override
+			public ListCell<T> call(ListView<T> arg0) {
+				return new ListCell<T>() {
+
+					@Override
+					protected void updateItem(T item, boolean empty) {
+						super.updateItem(item, empty);
+
+						setText("");
+						setGraphic(null);
+						setStyle(null);
+
+						if (!empty) {
+							HBox parent = Controls.createHBox(10.0, Pos.CENTER_LEFT);
+
+							Label toStringLabel = new Label(toString.apply(item));
+
+							setEmphasizedDeemphasizedStyleIfNecessary(toStringLabel, item);
+							setGlyphIfNecessary(toStringLabel, item);
+
+							parent.getChildren().add(toStringLabel);
+
+							List<Object> columnValues = extraColumnsFunction.apply(item);
+
+							for (Object columnValue : columnValues) {
+								Label columnLabel = new Label();
+
+								if (columnValue != null) {
+									columnLabel.setText(columnValue.toString());
+									columnLabel.setStyle(CssStyle.TEXT_FILL_SHY + CssStyle.BACKGROUND_COLOR_WHITE);
+								}
+
+								parent.getChildren().add(columnLabel);
+							}
+
+							setGraphic(parent);
+						}
+
+					}
+				};
+			}
+		});
+	}
+
+	private void setGlyphIfNecessary(Labeled labeled, T item) {
 		if (glyphStyleFunction != null) {
 			Optional<Pair<Glyph, String>> glyphAndStyle = glyphStyleFunction.apply(item);
 
@@ -277,28 +282,32 @@ public class ComboBoxCustomizer<T> {
 		if (items != null) {
 
 			final Predicate<T> emptyTextPredicate;
-			if (items.size() > ITEMS_SIZE_TO_CUT)
+
+			if (items.size() > ITEMS_SIZE_TO_CUT) {
 				emptyTextPredicate = o -> false;
-				else
-					emptyTextPredicate = o -> false; // o -> true;
+			} else {
+				emptyTextPredicate = o -> false; // o -> true;
+			}
 
-					comboBox.setEditable(true);
+			comboBox.setEditable(true);
 
-					ObservableList<T> initialItems = null;
-					Stream<T> initialItemsStream = items.parallelStream();
-					if (emptyTextPredicate != null)
-						initialItemsStream = initialItemsStream.filter(emptyTextPredicate);
-					initialItems = FXCollections.observableArrayList(initialItemsStream.collect(Collectors.toList()));
-					comboBox.setItems(initialItems);
+			ObservableList<T> initialItems = null;
+			Stream<T> initialItemsStream = items.parallelStream();
+			if (emptyTextPredicate != null) {
+				initialItemsStream = initialItemsStream.filter(emptyTextPredicate);
+			}
 
-					if (comboBox.getPromptText() != null && !comboBox.getPromptText().isEmpty()
-							&& comboBox.getTooltip() == null) {
-						comboBox.setTooltip(new Tooltip(comboBox.getPromptText()));
-					}
+			initialItems = FXCollections.observableArrayList(initialItemsStream.collect(Collectors.toList()));
+			comboBox.setItems(initialItems);
 
-					comboBox.getEditor().textProperty().addListener((ov, old_v, new_v) -> {
-						if(timeToSearch()) search(emptyTextPredicate, new_v);
-					});
+			if (comboBox.getPromptText() != null && !comboBox.getPromptText().isEmpty()
+					&& comboBox.getTooltip() == null) {
+				comboBox.setTooltip(new Tooltip(comboBox.getPromptText()));
+			}
+
+			comboBox.getEditor().textProperty().addListener((ov, old_v, new_v) -> {
+				if(timeToSearch()) search(emptyTextPredicate, new_v);
+			});
 		}
 	}
 
@@ -326,6 +335,10 @@ public class ComboBoxCustomizer<T> {
 	private void search(final Predicate<T> emptyTextPredicate, String newText) {
 		comboBox.hide();
 
+		if(comboBox.getValue() != null) {
+			return;
+		}
+
 		Predicate<T> predicate = null;
 		Comparator<? super T> comparator = null;
 
@@ -335,43 +348,31 @@ public class ComboBoxCustomizer<T> {
 		} else {
 
 			final String newValueLowerCase = newText.toLowerCase();
-			final String newValueCyrrilicLowerCase;
+			final String newValueCyrrilicLowerCase = convertToCyrrylicLowerCaseIfAccessible(newValueLowerCase);
 
-			final String firstLetter = newValueLowerCase.trim().substring(0, 1);
-			if (!StringUtils.isCyryllicLetter(firstLetter)) {
-				newValueCyrrilicLowerCase = StringUtils.convertKeyboardLayout(newValueLowerCase,
-						KeyboardLayoutConvertationType.FROM_LATIN_TO_RU).toLowerCase();
-			} else
-				newValueCyrrilicLowerCase = null;
+			predicate = generatePredicate(newValueLowerCase, newValueCyrrilicLowerCase);
+			comparator = generateComparator(newValueLowerCase, newValueCyrrilicLowerCase);
 
-			if (StringUtils.isNotBlank(newValueCyrrilicLowerCase))
-				predicate = o -> toString.apply(o).toLowerCase().contains(newValueLowerCase)
-				|| toString.apply(o).toLowerCase().contains(newValueCyrrilicLowerCase);
-				else
-					predicate = o -> toString.apply(o).toLowerCase().contains(newText.toLowerCase());
-
-					comparator = (o1, o2) -> {
-						int index_1 = toString.apply(o1).toLowerCase().indexOf(newValueLowerCase);
-						if (index_1 == -1 && StringUtils.isNotBlank(newValueCyrrilicLowerCase))
-							index_1 = toString.apply(o1).toLowerCase().indexOf(newValueCyrrilicLowerCase);
-
-						int index_2 = toString.apply(o2).toLowerCase().indexOf(newValueLowerCase);
-						if (index_2 == -1 && StringUtils.isNotBlank(newValueCyrrilicLowerCase))
-							index_2 = toString.apply(o2).toLowerCase().indexOf(newValueCyrrilicLowerCase);
-
-						int result = Integer.valueOf(index_1 == -1 ? 1000 : index_1)
-								.compareTo(Integer.valueOf(index_2 == -1 ? 1000 : index_2));
-
-						if (result == 0)
-							result = toString.apply(o1).toLowerCase().compareTo(toString.apply(o2).toLowerCase());
-						return result;
-					};
-
-					if (extraOrFilterFunction != null)
-						predicate = predicate.or(o -> extraOrFilterFunction.apply(o, newValueLowerCase));
+			if (extraOrFilterFunction != null) {
+				predicate = predicate.or(o -> extraOrFilterFunction.apply(o, newValueLowerCase));
+			}
 
 		}
 
+		List<T> filteredItems = getFilteredItems(predicate, comparator);
+
+		comboBox.getItems().clear();
+		comboBox.getItems().addAll(filteredItems);
+
+		if (comboBox.getValue() == null) {
+			comboBox.show();
+			comboBox.autosize();
+		}
+
+		log.trace("ComboBoxCustomizer items filtered by entered text '{}' ", newText);
+	}
+
+	private List<T> getFilteredItems(Predicate<T> predicate, Comparator<? super T> comparator) {
 		List<T> filteredItems;
 
 		Stream<T> stream = items.parallelStream();
@@ -383,16 +384,55 @@ public class ComboBoxCustomizer<T> {
 
 		if (filteredItems.size() > ITEMS_SIZE_TO_CUT)
 			filteredItems.subList(ITEMS_SIZE_TO_CUT, filteredItems.size()).clear();
+		return filteredItems;
+	}
 
-		comboBox.getItems().clear();
-		comboBox.getItems().addAll(filteredItems);
+	private Comparator<? super T> generateComparator(final String newValueLowerCase,
+			final String newValueCyrrilicLowerCase) {
+		Comparator<? super T> comparator;
+		comparator = (o1, o2) -> {
+			int index_1 = toString.apply(o1).toLowerCase().indexOf(newValueLowerCase);
+			if (index_1 == -1 && StringUtils.isNotBlank(newValueCyrrilicLowerCase))
+				index_1 = toString.apply(o1).toLowerCase().indexOf(newValueCyrrilicLowerCase);
 
-		if (comboBox.getValue() == null) {
-			comboBox.show();
-			comboBox.autosize();
+			int index_2 = toString.apply(o2).toLowerCase().indexOf(newValueLowerCase);
+			if (index_2 == -1 && StringUtils.isNotBlank(newValueCyrrilicLowerCase))
+				index_2 = toString.apply(o2).toLowerCase().indexOf(newValueCyrrilicLowerCase);
+
+			int result = Integer.valueOf(index_1 == -1 ? 1000 : index_1)
+					.compareTo(Integer.valueOf(index_2 == -1 ? 1000 : index_2));
+
+			if (result == 0)
+				result = toString.apply(o1).toLowerCase().compareTo(toString.apply(o2).toLowerCase());
+			return result;
+		};
+		return comparator;
+	}
+
+	private Predicate<T> generatePredicate(final String newValueLowerCase, final String newValueCyrrilicLowerCase) {
+		Predicate<T> predicate;
+
+		if (StringUtils.isNotBlank(newValueCyrrilicLowerCase)) {
+			predicate = o -> toString.apply(o).toLowerCase().contains(newValueLowerCase)
+					|| toString.apply(o).toLowerCase().contains(newValueCyrrilicLowerCase);
+		}
+		else {
+			predicate = o -> toString.apply(o).toLowerCase().contains(newValueLowerCase);
 		}
 
-		log.trace("ComboBoxCustomizer items filtered by entered text '{}' ", newText);
+		return predicate;
+	}
+
+	private String convertToCyrrylicLowerCaseIfAccessible(final String text) {
+		final String newValueCyrrilicLowerCase;
+
+		final String firstLetter = text.trim().substring(0, 1);
+		if (!StringUtils.isCyryllicLetter(firstLetter)) {
+			newValueCyrrilicLowerCase = StringUtils.convertKeyboardLayout(text,
+					KeyboardLayoutConvertationType.FROM_LATIN_TO_RU).toLowerCase();
+		} else
+			newValueCyrrilicLowerCase = null;
+		return newValueCyrrilicLowerCase;
 	}
 
 	private void switchClearOnDoubleClick() {
