@@ -125,8 +125,14 @@ public class CssStyle {
 	}
 
 	public static void addIfNotContains(Control control, String styleToAdd) {
-		if (!control.getStyle().contains(styleToAdd))
+		if (!control.getStyle().contains(styleToAdd)) {
+			String style = control.getStyle();
+			if(style != null) {
+				styleToAdd += style;
+			}
+			
 			control.setStyle(styleToAdd);
+		}
 	}
 
 }

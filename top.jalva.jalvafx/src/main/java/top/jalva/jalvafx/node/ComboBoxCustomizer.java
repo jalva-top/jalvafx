@@ -2,6 +2,7 @@ package top.jalva.jalvafx.node;
 
 import java.time.LocalTime;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
@@ -17,6 +18,7 @@ import org.controlsfx.glyphfont.FontAwesome.Glyph;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.geometry.Pos;
@@ -217,8 +219,10 @@ public class ComboBoxCustomizer<T> {
 		if (emphasizedPredicate != null && emphasizedPredicate.test(item)) {
 			labeled.setStyle(EMPHASIZED_CSS_STYLE);
 			labeled.setGraphic(Glyphs.createGlyph(emphasizedGlyph, emphasizedGlyphCssStyle));
-		} else if (deemphasizedPredicate != null && deemphasizedPredicate.test(item))
-			labeled.setStyle(DE_EMPHASIZED_CSS_STYLE);
+		} else 
+			if (deemphasizedPredicate != null && deemphasizedPredicate.test(item)) {
+				labeled.setStyle(DE_EMPHASIZED_CSS_STYLE);
+			}
 	}
 
 	private void setExtraColumnsCellFactory() {
@@ -281,34 +285,45 @@ public class ComboBoxCustomizer<T> {
 
 		if (items != null) {
 
-			final Predicate<T> emptyTextPredicate;
-
-			if (items.size() > ITEMS_SIZE_TO_CUT) {
-				emptyTextPredicate = o -> false;
-			} else {
-				emptyTextPredicate = o -> false; // o -> true;
-			}
-
 			comboBox.setEditable(true);
 
-			ObservableList<T> initialItems = null;
-			Stream<T> initialItemsStream = items.parallelStream();
-			if (emptyTextPredicate != null) {
-				initialItemsStream = initialItemsStream.filter(emptyTextPredicate);
-			}
+			comboBox.getItems().clear();
+			comboBox.getItems().addAll(getInitialItems());
 
-			initialItems = FXCollections.observableArrayList(initialItemsStream.collect(Collectors.toList()));
-			comboBox.setItems(initialItems);
-
-			if (comboBox.getPromptText() != null && !comboBox.getPromptText().isEmpty()
-					&& comboBox.getTooltip() == null) {
+			if (StringUtils.isNotBlank(comboBox.getPromptText()) && comboBox.getTooltip() == null) {
 				comboBox.setTooltip(new Tooltip(comboBox.getPromptText()));
 			}
 
-			comboBox.getEditor().textProperty().addListener((ov, old_v, new_v) -> {
-				if(timeToSearch()) search(emptyTextPredicate, new_v);
-			});
+			comboBox.getEditor().textProperty().addListener((ov, oldText, newText) -> handleEnteredText(newText));
 		}
+	}
+
+	private List<T> getInitialItems() {
+		List<T> initialItems = null;
+		
+		Stream<T> initialItemsStream = items.parallelStream();
+		Predicate<T> emptyTextPredicate = getEmptyTextPredicate();
+		if (emptyTextPredicate != null) {
+			initialItemsStream = initialItemsStream.filter(emptyTextPredicate);
+		}
+
+		initialItems = initialItemsStream.collect(Collectors.toList());
+		
+		return initialItems;
+	}
+
+	private void handleEnteredText(String newItem) {
+		if(comboBox.getValue() == null) {
+			if(timeToSearch()) search(getEmptyTextPredicate(), newItem);
+		} else {
+			if(StringUtils.isBlank(newItem)) {
+				Platform.runLater(()-> comboBox.setValue(null));
+			}
+		}
+	}
+
+	private Predicate<T> getEmptyTextPredicate() {
+		return o -> false;
 	}
 
 	private boolean timeToSearch(){	
@@ -369,10 +384,22 @@ public class ComboBoxCustomizer<T> {
 			comboBox.autosize();
 		}
 
-		log.trace("ComboBoxCustomizer items filtered by entered text '{}' ", newText);
+		if(log.isTraceEnabled()) {
+			log.trace("ComboBoxCustomizer items({}) filtered by entered text '{}': {} items found", items.size(), newText, filteredItems.size());
+		}
 	}
 
 	private List<T> getFilteredItems(Predicate<T> predicate, Comparator<? super T> comparator) {
+		
+		if(items == null) {
+			log.warn("ComboBoxCustomizer items (null) cannot be filtered");
+			return Collections.emptyList();
+		}
+
+		if(log.isTraceEnabled() && items != null) {
+			log.trace("items to filter size {}", items.size());
+		}
+
 		List<T> filteredItems;
 
 		Stream<T> stream = items.parallelStream();
@@ -384,6 +411,11 @@ public class ComboBoxCustomizer<T> {
 
 		if (filteredItems.size() > ITEMS_SIZE_TO_CUT)
 			filteredItems.subList(ITEMS_SIZE_TO_CUT, filteredItems.size()).clear();
+
+		if(log.isTraceEnabled() && items != null) {
+			log.trace("filtered items size {}", filteredItems.size());
+		}
+
 		return filteredItems;
 	}
 
@@ -430,8 +462,10 @@ public class ComboBoxCustomizer<T> {
 		if (!StringUtils.isCyryllicLetter(firstLetter)) {
 			newValueCyrrilicLowerCase = StringUtils.convertKeyboardLayout(text,
 					KeyboardLayoutConvertationType.FROM_LATIN_TO_RU).toLowerCase();
-		} else
+		} else {
 			newValueCyrrilicLowerCase = null;
+		}
+
 		return newValueCyrrilicLowerCase;
 	}
 

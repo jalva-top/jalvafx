@@ -124,7 +124,7 @@ public class StringUtils {
 
 	public enum KeyboardLayoutConvertationType {
 
-		FROM_LATIN_AND_UKR_TO_RU("qwertyuiopasdfghjklzxcvbnmіє", "йцукенгшщзфывапролдячсмитьыэ"), FROM_LATIN_TO_RU(
+		FROM_LATIN_AND_UKR_TO_RU("qwertyuiopasdfghjklzxcvbnmіє", "йцукенгшщзфывапролдячсмитьыэ"), FROM_LATIN_AND_RU_TO_UKR("qwertyuiopasdfghjklzxcvbnmыэъ", "йцукенгшщзфівапролдячсмитьієї"), FROM_LATIN_TO_RU(
 				"qwertyuiopasdfghjklzxcvbnm", "йцукенгшщзфывапролдячсмить"), FROM_CYRRILIC_TO_LATIN(
 						"йцукенгшщзхъфывапролджэячсмитьбюіє", "qwertyuiop[]asdfghjkl;'zxcvbnm,.s'"), PARCE_EMAIL(
 								"йцукенгшщзфывапролдячсмитьюі\"", "qwertyuiopasdfghjklzxcvbnm.s@");
