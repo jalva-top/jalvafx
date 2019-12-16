@@ -713,9 +713,12 @@ public class Controls {
 	private static Label decoratePropertyNameLabel(Label label, String propertyName) {
 		label.setText(propertyName + ":");
 		label.setPrefWidth(120.0);
-		label.setStyle(
-				CssStyle.TEXT_FILL_SHY + CssStyle.TEXT_NOT_ITALIC + CssStyle.TEXT_NOT_BOLD + CssStyle.FONT_SIZE_12px);
+		label.setStyle(getPropertyNameStyle());
 		return label;
+	}
+
+	private static String getPropertyNameStyle() {
+		return CssStyle.TEXT_FILL_SHY + CssStyle.TEXT_NOT_ITALIC + CssStyle.TEXT_NOT_BOLD + CssStyle.FONT_SIZE_12px;
 	}
 
 	public static HBox getStringPropertyRow(String propertyName, String propertyValue, CustomTextField textField,

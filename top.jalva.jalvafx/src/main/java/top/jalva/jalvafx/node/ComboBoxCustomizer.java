@@ -300,7 +300,7 @@ public class ComboBoxCustomizer<T> {
 
 	private List<T> getInitialItems() {
 		List<T> initialItems = null;
-		
+
 		Stream<T> initialItemsStream = items.parallelStream();
 		Predicate<T> emptyTextPredicate = getEmptyTextPredicate();
 		if (emptyTextPredicate != null) {
@@ -308,7 +308,7 @@ public class ComboBoxCustomizer<T> {
 		}
 
 		initialItems = initialItemsStream.collect(Collectors.toList());
-		
+
 		return initialItems;
 	}
 
@@ -380,8 +380,10 @@ public class ComboBoxCustomizer<T> {
 		comboBox.getItems().addAll(filteredItems);
 
 		if (comboBox.getValue() == null) {
-			comboBox.show();
-			comboBox.autosize();
+			if(StringUtils.isNotBlank(newText)) {
+				comboBox.show();
+				comboBox.autosize();
+			}
 		}
 
 		if(log.isTraceEnabled()) {
@@ -390,14 +392,10 @@ public class ComboBoxCustomizer<T> {
 	}
 
 	private List<T> getFilteredItems(Predicate<T> predicate, Comparator<? super T> comparator) {
-		
+
 		if(items == null) {
 			log.warn("ComboBoxCustomizer items (null) cannot be filtered");
 			return Collections.emptyList();
-		}
-
-		if(log.isTraceEnabled() && items != null) {
-			log.trace("items to filter size {}", items.size());
 		}
 
 		List<T> filteredItems;
@@ -411,10 +409,6 @@ public class ComboBoxCustomizer<T> {
 
 		if (filteredItems.size() > ITEMS_SIZE_TO_CUT)
 			filteredItems.subList(ITEMS_SIZE_TO_CUT, filteredItems.size()).clear();
-
-		if(log.isTraceEnabled() && items != null) {
-			log.trace("filtered items size {}", filteredItems.size());
-		}
 
 		return filteredItems;
 	}

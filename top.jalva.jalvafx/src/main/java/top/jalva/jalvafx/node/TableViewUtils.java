@@ -124,11 +124,12 @@ public class TableViewUtils {
 				protected void updateItem(K item, boolean empty) {
 					super.updateItem(item, empty);
 
-					setText(empty ? "" : item.toString());
+					setText("");
 					setGraphic(null);
-					setStyle("");
+					setStyle(null);
 
-					if (!empty && item != null) {
+					if (item != null && !empty) {
+						setText(item.toString());
 						String style = styleFunction.apply(item);
 						if (StringUtils.isNotBlank(style))
 							setStyle(style);
